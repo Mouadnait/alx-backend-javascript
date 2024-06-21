@@ -1,44 +1,55 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable jest/no-hooks */
-const { expect } = require('chai');
+/**
+ * @file Test suite for sendPaymentRequestToAPi method using Sinon for spies and Chai for assertions.
+ */
+
 const sinon = require('sinon');
-const sendPaymentRequestToApi = require('./5-payment');
+const { expect } = require('chai');
 const Utils = require('./utils');
+const sendPaymentRequestToAPi = require('./5-payment');
 
-describe('sendPaymentRequestToApi', () => {
-  let consoleSpy;
+/**
+ * Main test suite for sendPaymentRequestToAPi function.
+ */
+describe('sendPaymentRequestToApi', function() {
 
-  beforeEach(() => {
-    consoleSpy = sinon.spy(console, 'log');
-  });
+  /**
+   * Test suite for logging the result of Utils.calculateNumber() called within sendPaymentRequestToApi.
+   */
+  describe('#pys Utils.calculateNumber()', function() {
+    let spy;
 
-  afterEach(() => {
-    consoleSpy.restore();
-  });
+    /**
+     * Setup a spy on console.log before each test.
+     * @function
+     */
+    beforeEach(function() {
+      spy = sinon.spy(console, 'log');
+    });
 
-  // eslint-disable-next-line jest/prefer-expect-assertions
-  it('calls sendPaymentRequestToAPI with 100, and 20: and logs "The total is: 120" once', () => {
-    const totalAmount = 100;
-    const totalShipping = 20;
-    const expectedSum = Utils.calculateNumber('SUM', totalAmount, totalShipping);
+    /**
+     * Restore the spy on console.log after each test.
+     * @function
+     */
+    afterEach(function() {
+      spy.restore();
+    });
 
-    sendPaymentRequestToApi(totalAmount, totalShipping);
+    /**
+     * Test case to verify that sendPaymentRequestToAPI logs 'The total is: 120' when called with (100, 20).
+     */
+    it('should be return 120 when called by sendPaymentRequestToAPI', function() {
+      sendPaymentRequestToAPi(100, 20);
+      expect(spy.calledWith('The total is: 120')).to.equal(true);
+      expect(spy.calledOnce).to.equal(true);
+    });
 
-    expect(consoleSpy.calledOnce).to.be.true;
-    expect(consoleSpy.calledWith(`The total is: ${expectedSum}`)).to.be.true;
-  });
-
-  // eslint-disable-next-line jest/prefer-expect-assertions
-  it('calls sendPaymentRequestToAPI with 10, and 10: and logs "The total is: 20" once', () => {
-    const totalAmount = 10;
-    const totalShipping = 10;
-    const expectedSum = Utils.calculateNumber('SUM', totalAmount, totalShipping);
-
-    sendPaymentRequestToApi(totalAmount, totalShipping);
-
-    // eslint-disable-next-line no-unused-expressions
-    expect(consoleSpy.calledOnce).to.be.true;
-    // eslint-disable-next-line no-unused-expressions
-    expect(consoleSpy.calledWith(`The total is: ${expectedSum}`)).to.be.true;
+    /**
+     * Test case to verify that sendPaymentRequestToAPI logs 'The total is: 20' when called with (10, 10).
+     */
+    it('should be return 20 when called by sendPaymentRequestToAPI', function() {
+      sendPaymentRequestToAPi(10, 10);
+      expect(spy.calledWith('The total is: 20')).to.equal(true);
+      expect(spy.calledOnce).to.equal(true);
+    });
   });
 });
