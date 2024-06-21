@@ -1,99 +1,111 @@
-/* eslint-disable jest/expect-expect */
-const assert = require('assert');
-const http = require('http');
+/**
+ * @file Test suite for Express app using Chai for assertions and request for HTTP requests.
+ */
 
-// Set up the endpoint URLs
-const BASE_URL = 'http://localhost:7866';
-const LOGIN_URL = `${BASE_URL}/login`;
-const PAYMENTS_URL = `${BASE_URL}/available_payments`;
+const { expect } = require('chai');
+const request = require('request');
 
-// Test the /login endpoint
-describe('/login', () => {
-  it('should return a welcome message with the username', () => new Promise((done) => {
-    // Define the request payload
-    const payload = JSON.stringify({ userName: 'john_doe' });
+const HOST = '127.0.0.1';
+const PORT = '7865';
 
-    // Set up the request options
-    const options = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      url: LOGIN_URL,
-      body: payload,
-    };
-
-    // Send the request
-    const req = http.request(options, (res) => {
-      let data = '';
-
-      // Set up the response listener
-      res.on('data', (chunk) => {
-        data += chunk;
+/**
+ * Main test suite for the Express app.
+ */
+describe('Express app test suite', function() {
+  
+  /**
+   * Test suite for the root path.
+   */
+  describe('/', function() {
+    
+    /**
+     * Test case to verify the home page response.
+     * @param {function} done - Callback to signal the completion of the test.
+     */
+    it('should return home page', function(done) {
+      request.get(`http://${HOST}:${PORT}/`, (error, res, body) => {
+        if (error) expect(res.statusCode).to.not.equal(200);
+        expect(res.statusCode).to.equal(200);
+        expect(body).to.equal('Welcome to the payment system');
+        done();
       });
+    });
+  });
 
-      // Set up the end listener
-      res.on('end', () => {
-        // Parse the response body
-        const body = JSON.parse(data);
-
-        // Check the status code
-        assert.strictEqual(res.statusCode, 200);
-
-        // Check the response message
-        assert.strictEqual(body.message, 'Welcome john_doe');
-
-        // Done
+  /**
+   * Test suite for the /cart/:id path.
+   */
+  describe('/cart/:id', function() {
+    
+    /**
+     * Test case to verify the cart page response with a valid cart ID.
+     * @param {function} done - Callback to signal the completion of the test.
+     */
+    it('should return cart page with cart id', function(done) {
+      request.get(`http://${HOST}:${PORT}/cart/14`, (error, res, body) => {
+        if (error) expect(res.statusCode).to.not.equal(200);
+        expect(res.statusCode).to.equal(200);
+        expect(body).to.equal('Payment methods for cart 14');
         done();
       });
     });
 
-    // Send the request payload
-    req.write(payload);
-
-    // End the request
-    req.end();
-  }));
-});
-
-// Test the /available_payments endpoint
-describe('/available_payments', () => {
-  it('should return the list of available payments', () => new Promise((done) => {
-    // Set up the request options
-    const options = {
-      method: 'GET',
-      url: PAYMENTS_URL,
-    };
-
-    // Send the request
-    const req = http.request(options, (res) => {
-      let data = '';
-
-      // Set up the response listener
-      res.on('data', (chunk) => {
-        data += chunk;
+    /**
+     * Test case to verify the response when the cart ID is not a number.
+     * @param {function} done - Callback to signal the completion of the test.
+     */
+    it('should return an error if :id parameter is not a number', function(done) {
+      request.get(`http://${HOST}:${PORT}/cart/ae`, (error, res, body) => {
+        if (error) expect(res.statusCode).to.not.equal(200);
+        expect(res.statusCode).to.equal(404);
+        done();
       });
+    });
+  });
 
-      // Set up the end listener
-      res.on('end', () => {
-        // Parse the response body
-        const body = JSON.parse(data);
+  /**
+   * Test suite for the /available_payments path.
+   */
+  describe('/available_payments', function() {
+    
+    /**
+     * Test case to verify the available payment methods response.
+     * @param {function} done - Callback to signal the completion of the test.
+     */
+    it('should get the available payment methods', function(done) {
+      const expectedResponse = {
+        payment_methods: {
+          credit_cards: true,
+          paypal: false,
+        },
+      };
+      request.get(`http://${HOST}:${PORT}/available_payments`, (error, res, body) => {
+        if (error) expect(res.statusCode).to.not.equal(200);
+        expect(res.statusCode).to.equal(200);
+        expect(body).to.equal(JSON.stringify(expectedResponse));
+        done();
+      });
+    });
+  });
 
-        // Check the status code
-        assert.strictEqual(res.statusCode, 200);
-
-        // Check the response structure
-        assert.deepStrictEqual(body, {
-          payment_methods: {
-            credit_cards: true,
-            paypal: false,
-          },
+  /**
+   * Test suite for the /login path.
+   */
+  describe('/login', function() {
+    
+    /**
+     * Test case to verify the login response.
+     * @param {function} done - Callback to signal the completion of the test.
+     */
+    it('should return a welcome message for the user', function(done) {
+      const userName = 'Tester';
+      request.post({ url: `http://${HOST}:${PORT}/login`, form: { userName } },
+        (error, res, body) => {
+          if (error) expect(res.statusCode).to.not.equal(200);
+          expect(res.statusCode).to.equal(200);
+          expect(body).to.equal(`Welcome ${userName}`);
+          done();
         });
-
-        // Done
-        done();
-      });
     });
-
-    // End the request
-    req.end();
-  }));
+  });
 });
