@@ -1,57 +1,31 @@
-const http = require('http');
-const app = require('./api');
+/**
+ * @file Test suite for Express app using Chai for assertions and request for HTTP requests.
+ */
 
-// Define a simple test runner
-function runTests(tests) {
-  let failures = 0;
-  for (const [name, test] of tests) {
-    console.log(`Running test: ${name}`);
-    try {
-      test();
-      console.log(`\t✓ Passed`);
-    } catch (error) {
-      failures++;
-      console.log(`\t✕ Failed: ${error.message}`);
-    }
-  }
-  console.log(`\n${failures} test(s) failed`);
-}
+const { expect } = require('chai');
+const request = require('request');
 
-// Define an assertion function for checking status codes
-function expectStatus(response, statusCode) {
-  if (response.statusCode !== statusCode) {
-    throw new Error(`Expected status ${statusCode}, but got ${response.statusCode}`);
-  }
-}
+const HOST = '127.0.0.1';
+const PORT = '7865';
 
-// Define an assertion function for checking response bodies
-function expectBody(response, expectedBody) {
-  let body = '';
-  response.on('data', chunk => {
-    body += chunk;
-  });
-  response.on('end', () => {
-    if (body !== expectedBody) {
-      throw new Error(`Expected body "${expectedBody}", but got "${body}"`);
-    }
-  });
-}
-
-// Define the tests for the index page
-const indexTests = [
-  ['Returns status code 200', () => {
-    const request = http.get('http://localhost:7865', response => {
-      expectStatus(response, 200);
+/**
+ * Main test suite for the Express app.
+ */
+describe('Express app test suite', function() {
+  
+  /**
+   * Test case to verify the home page response.
+   * @param {function} done - Callback to signal the completion of the test.
+   */
+  it('should return home page', function(done) {
+    request.get(`http://${HOST}:${PORT}/`, (error, res, body) => {
+      if (error) {
+        expect(res.statusCode).to.not.equal(200);
+      } else {
+        expect(res.statusCode).to.equal(200);
+        expect(body).to.equal('Welcome to the payment system');
+      }
+      done();
     });
-  }],
-  ['Returns the welcome message', () => {
-    const request = http.get('http://localhost:7865', response => {
-      expectStatus(response, 200);
-      expectBody(response, 'Welcome to the payment system');
-    });
-  }]
-];
-
-// Run the tests for the index page
-console.log('Running tests for the index page:');
-runTests(indexTests);
+  });
+});
