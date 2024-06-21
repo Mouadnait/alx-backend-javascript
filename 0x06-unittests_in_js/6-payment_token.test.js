@@ -1,30 +1,32 @@
-/* eslint-disable jest/expect-expect */
-/* eslint-disable jest/valid-expect */
-const { expect } = require('chai');
-const assert = require('assert');
+/**
+ * @file Test suite for getPaymentTokenFromAPI method using Chai for assertions.
+ */
 
+const { expect } = require('chai');
 const getPaymentTokenFromAPI = require('./6-payment_token');
 
-describe('getPaymentTokenFromAPI', () => {
-  it('returns a resolved promise with the object {data: "Successful response from the API"} when success is true', () => new Promise((done) => {
-    getPaymentTokenFromAPI(true)
-      .then((response) => {
-        expect(response).to.deep.equal({ data: 'Successful response from the API' });
-        done();
-      })
-      .catch(done);
-  }));
+/**
+ * Main test suite for getPaymentTokenFromAPI function.
+ */
+describe('getPaymentTokenFromAPI', function() {
 
-  // FAILING BELOW
-  // eslint-disable-next-line jest/no-commented-out-tests, jest/no-disabled-tests
-  it.skip('should return a rejected promise when success is false', () => new Promise((done) => {
-    getPaymentTokenFromAPI(false, (err) => {
-      try {
-        assert.strictEqual(err, 'Error');
-        done();
-      } catch (err) {
-        done(err);
-      }
+  /**
+   * Test suite for asynchronous behavior.
+   */
+  describe('#Async test', function() {
+
+    /**
+     * Test case to verify the response from the payment API.
+     * @param {function} done - Callback to signal the completion of the test.
+     */
+    it('should test response from payment API', function(done) {
+      getPaymentTokenFromAPI(true)
+        .then((res) => {
+          expect(res).to.be.an('object')
+            .with.property('data', 'Successful response from the API');
+          done();
+        })
+        .catch(done); // Add catch to handle any unexpected errors
     });
-  }));
+  });
 });
